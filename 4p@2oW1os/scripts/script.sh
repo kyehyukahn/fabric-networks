@@ -139,7 +139,7 @@ instantiateChaincode () {
 	echo "===================== Chaincode Instantiation on PEER$PEER on channel '$CHANNEL_NAME' is successful ===================== "
 	echo
 }
-
+ 
 chaincodeQuery () {
   PEER=$1
   echo "===================== Querying on PEER$PEER on channel '$CHANNEL_NAME'... ===================== "
@@ -154,7 +154,8 @@ chaincodeQuery () {
      sleep 3
      echo "Attempting to Query PEER$PEER ...$(($(date +%s)-starttime)) secs"
      peer chaincode query -C $CHANNEL_NAME -n mycc -c '{"Args":["query","a"]}' >&log.txt
-     test $? -eq 0 && VALUE=$(cat log.txt | awk '/Query Result/ {print $NF}')
+#     test $? -eq 0 && VALUE=$(cat log.txt | awk '/Query Result/ {print $NF}')
+     test $? -eq 0 && VALUE=$(tail -n 1 log.txt)
      test "$VALUE" = "$2" && let rc=0
   done
   echo
