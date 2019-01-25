@@ -1,6 +1,6 @@
 {
   "name":"sample-network",
-  "description":"Sample network contains 4 peers (2 orgs), 1 orderer and 2 cas for Python SDK testing",
+  "description":"Sample network contains 7 peers (3 orgs), 1 orderer and 2 cas for Python SDK testing",
   "version":"0.1",
   "client":{
     "organization":"Org1",
