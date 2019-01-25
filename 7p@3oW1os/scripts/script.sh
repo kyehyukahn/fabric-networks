@@ -40,7 +40,7 @@ setGlobals () {
 		else
 			CORE_PEER_ADDRESS=peer1.org1.example.com:7051
 		fi
-	else
+	elif [ $1 -eq 2 -o $1 -eq 3 ] ; then
 		CORE_PEER_LOCALMSPID="Org2MSP"
 		CORE_PEER_TLS_ROOTCERT_FILE=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/tls/ca.crt
 		CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org2.example.com/users/Admin@org2.example.com/msp
@@ -48,6 +48,17 @@ setGlobals () {
 			CORE_PEER_ADDRESS=peer0.org2.example.com:7051
 		else
 			CORE_PEER_ADDRESS=peer1.org2.example.com:7051
+		fi
+	else 
+		CORE_PEER_LOCALMSPID="Org3MSP"
+		CORE_PEER_TLS_ROOTCERT_FILE=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org3.example.com/peers/peer0.org3.example.com/tls/ca.crt
+		CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org3.example.com/users/Admin@org3.example.com/msp
+		if [ $1 -eq 4 ]; then
+			CORE_PEER_ADDRESS=peer0.org3.example.com:7051
+		elif [ $1 -eq 5 ]; then
+			CORE_PEER_ADDRESS=peer1.org3.example.com:7051
+		else 
+			CORE_PEER_ADDRESS=peer2.org3.example.com:7051
 		fi
 	fi
 
@@ -57,7 +68,7 @@ setGlobals () {
 createChannel() {
 	setGlobals 0
 
-        if [ -z "$CORE_PEER_TLS_ENABLED" -o "$CORE_PEER_TLS_ENABLED" = "false" ]; then
+    if [ -z "$CORE_PEER_TLS_ENABLED" -o "$CORE_PEER_TLS_ENABLED" = "false" ]; then
 		peer channel create -o orderer.example.com:7050 -c $CHANNEL_NAME -f ./channel-artifacts/channel.tx >&log.txt
 	else
 		peer channel create -o orderer.example.com:7050 -c $CHANNEL_NAME -f ./channel-artifacts/channel.tx --tls $CORE_PEER_TLS_ENABLED --cafile $ORDERER_CA >&log.txt
@@ -70,10 +81,10 @@ createChannel() {
 }
 
 updateAnchorPeers() {
-        PEER=$1
-        setGlobals $PEER
+    PEER=$1
+    setGlobals $PEER
 
-        if [ -z "$CORE_PEER_TLS_ENABLED" -o "$CORE_PEER_TLS_ENABLED" = "false" ]; then
+    if [ -z "$CORE_PEER_TLS_ENABLED" -o "$CORE_PEER_TLS_ENABLED" = "false" ]; then
 		peer channel update -o orderer.example.com:7050 -c $CHANNEL_NAME -f ./channel-artifacts/${CORE_PEER_LOCALMSPID}anchors.tx >&log.txt
 	else
 		peer channel update -o orderer.example.com:7050 -c $CHANNEL_NAME -f ./channel-artifacts/${CORE_PEER_LOCALMSPID}anchors.tx --tls $CORE_PEER_TLS_ENABLED --cafile $ORDERER_CA >&log.txt
@@ -103,7 +114,7 @@ joinWithRetry () {
 }
 
 joinChannel () {
-	for ch in 0 1 2 3; do
+	for ch in 0 1 2 3 4 5 6; do
 		setGlobals $ch
 		joinWithRetry $ch
 		echo "===================== PEER$ch joined on the channel \"$CHANNEL_NAME\" ===================== "
@@ -129,9 +140,9 @@ instantiateChaincode () {
 	# while 'peer chaincode' command can get the orderer endpoint from the peer (if join was successful),
 	# lets supply it directly as we know it using the "-o" option
 	if [ -z "$CORE_PEER_TLS_ENABLED" -o "$CORE_PEER_TLS_ENABLED" = "false" ]; then
-		peer chaincode instantiate -o orderer.example.com:7050 -C $CHANNEL_NAME -n mycc -v 1.0 -c '{"Args":["init","a","100","b","200"]}' -P "OR	('Org1MSP.member','Org2MSP.member')" >&log.txt
+		peer chaincode instantiate -o orderer.example.com:7050 -C $CHANNEL_NAME -n mycc -v 1.0 -c '{"Args":["init","a","100","b","200"]}' -P "OR	('Org1MSP.member','Org2MSP.member', 'Org3MSP.member')" >&log.txt
 	else
-		peer chaincode instantiate -o orderer.example.com:7050 --tls $CORE_PEER_TLS_ENABLED --cafile $ORDERER_CA -C $CHANNEL_NAME -n mycc -v 1.0 -c '{"Args":["init","a","100","b","200"]}' -P "OR	('Org1MSP.member','Org2MSP.member')" >&log.txt
+		peer chaincode instantiate -o orderer.example.com:7050 --tls $CORE_PEER_TLS_ENABLED --cafile $ORDERER_CA -C $CHANNEL_NAME -n mycc -v 1.0 -c '{"Args":["init","a","100","b","200"]}' -P "OR	('Org1MSP.member','Org2MSP.member','Org3MSP.member')" >&log.txt
 	fi
 	res=$?
 	cat log.txt
@@ -154,7 +165,8 @@ chaincodeQuery () {
      sleep 3
      echo "Attempting to Query PEER$PEER ...$(($(date +%s)-starttime)) secs"
      peer chaincode query -C $CHANNEL_NAME -n mycc -c '{"Args":["query","a"]}' >&log.txt
-     test $? -eq 0 && VALUE=$(cat log.txt | awk '/Query Result/ {print $NF}')
+#     test $? -eq 0 && VALUE=$(cat log.txt | awk '/Query Result/ {print $NF}')
+     test $? -eq 0 && VALUE=$(tail -n 1 log.txt)
      test "$VALUE" = "$2" && let rc=0
   done
   echo
@@ -199,12 +211,16 @@ echo "Updating anchor peers for org1..."
 updateAnchorPeers 0
 echo "Updating anchor peers for org2..."
 updateAnchorPeers 2
+echo "Updating anchor peers for org3..."
+updateAnchorPeers 4
 
-## Install chaincode on Peer0/Org1 and Peer2/Org2
+## Install chaincode on Peer0/Org1, Peer2/Org2 and Peer4/Org3
 echo "Installing chaincode on org1/peer0..."
 installChaincode 0
 echo "Install chaincode on org2/peer2..."
 installChaincode 2
+echo "Install chaincode on org3/peer4..."
+installChaincode 4
 
 #Instantiate chaincode on Peer2/Org2
 echo "Instantiating chaincode on org2/peer2..."
@@ -221,7 +237,6 @@ chaincodeInvoke 0
 ## Install chaincode on Peer3/Org2
 echo "Installing chaincode on org2/peer3..."
 installChaincode 3
-
 
 #Query on chaincode on Peer3/Org2, check if the result is 90
 echo "Querying chaincode on org2/peer3..."
