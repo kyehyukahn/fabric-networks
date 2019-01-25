@@ -31,8 +31,8 @@ services:
     - ./e2e_cli/crypto-config/ordererOrganizations/example.com/orderers/orderer.example.com/tls/:/var/hyperledger/orderer/tls
     command: orderer start
 
-  zookeeper.example.com:
-    container_name: zookeeper.example.com
+  zookeeper0.example.com:
+    container_name: zookeeper0.example.com
     image: hyperledger/fabric-zookeeper
 #    restart: always
     environment:
@@ -41,15 +41,39 @@ services:
     ports:
       - "2181:2181"
 
+  zookeeper1.example.com:
+    container_name: zookeeper1.example.com
+    image: hyperledger/fabric-zookeeper
+#    restart: always
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 32181
+      ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - "3181:2181"
+
+  zookeeper2.example.com:
+    container_name: zookeeper2.example.com
+    image: hyperledger/fabric-zookeeper
+#    restart: always
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 32181
+      ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - "4181:2181"
+
+
   kafka0.example.com:
     container_name: kafka0.example.com
     image: hyperledger/fabric-kafka
 #    restart: always
     depends_on:
-    - zookeeper.example.com
+    - zookeeper0.example.com
+    - zookeeper1.example.com
+    - zookeeper2.example.com
+
     environment:
       - KAFKA_BROKER_ID=0
-      - KAFKA_ZOOKEEPER_CONNECT=zookeeper.example.com:2181
+      - KAFKA_ZOOKEEPER_CONNECT=zookeeper0.example.com:2181, zookeeper1.example.com:2181, zookeeper2.example.com:2181
       - KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://kafka0.example.com:9092
       - KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR=1
       - KAFKA_MESSAGE_MAX_BYTES=1048576 # 1 * 1024 * 1024 B
@@ -66,10 +90,12 @@ services:
     image: hyperledger/fabric-kafka
 #    restart: always
     depends_on:
-    - zookeeper.example.com
+    - zookeeper0.example.com
+    - zookeeper1.example.com
+    - zookeeper2.example.com
     environment:
       - KAFKA_BROKER_ID=1
-      - KAFKA_ZOOKEEPER_CONNECT=zookeeper.example.com:2181
+      - KAFKA_ZOOKEEPER_CONNECT=zookeeper0.example.com:2181, zookeeper1.example.com:2181, zookeeper2.example.com:2181
       - KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://kafka1.example.com:9092
       - KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR=1
       - KAFKA_MESSAGE_MAX_BYTES=1048576 # 1 * 1024 * 1024 B
@@ -86,10 +112,12 @@ services:
     image: hyperledger/fabric-kafka
 #    restart: always
     depends_on:
-    - zookeeper.example.com
+    - zookeeper0.example.com
+    - zookeeper1.example.com
+    - zookeeper2.example.com
     environment:
       - KAFKA_BROKER_ID=2
-      - KAFKA_ZOOKEEPER_CONNECT=zookeeper.example.com:2181
+      - KAFKA_ZOOKEEPER_CONNECT=zookeeper0.example.com:2181, zookeeper1.example.com:2181, zookeeper2.example.com:2181
       - KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://kafka2.example.com:9092
       - KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR=1
       - KAFKA_MESSAGE_MAX_BYTES=1048576 # 1 * 1024 * 1024 B
