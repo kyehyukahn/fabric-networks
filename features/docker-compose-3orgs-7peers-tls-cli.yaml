@@ -18,6 +18,19 @@
 version: '2'  # v3 does not support 'extends' yet
 
 services:
+  ca.example.com:
+    image: hyperledger/fabric-ca:1.4.0
+    environment:
+      - FABRIC_CA_HOME=/etc/hyperledger/fabric-ca-server
+      - FABRIC_CA_SERVER_CA_NAME=ca.example.com
+#      - FABRIC_CA_SERVER_CA_CERTFILE=/etc/hyperledger/fabric-ca-server/ca-cert.pem
+#      - FABRIC_CA_SERVER_CA_KEYFILE=/etc/hyperledger/fabric-ca-server-config/4239aa0dcd76daeeb8ba0cda701851d14504d31aad1b2ddddbac6a57365e497c_sk
+    ports:
+      - "7054:7054"
+    command: bash -c "fabric-ca-server start  --ca.certfile /etc/hyperledger/fabric-ca-server/ca-cert.pem  --ca.keyfile /etc/hyperledger/fabric-ca-server/ca-key.pem -c /etc/hyperledger/fabric-ca-server/fabric-ca-server-config.yaml -b admin:adminpw"
+    volumes:
+      - ./ca/fabric-ca-server:/etc/hyperledger/fabric-ca-server
+    container_name: ca.example.com
 
   orderer0.example.com:  # There can be multiple orderers
     extends:

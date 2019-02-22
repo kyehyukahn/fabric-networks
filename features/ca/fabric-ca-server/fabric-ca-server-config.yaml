@@ -43,7 +43,7 @@
 port: 7054
 
 # Enables debug logging (default: false)
-debug: false
+debug: true
 
 #############################################################################
 #  TLS section for the server's listening port
