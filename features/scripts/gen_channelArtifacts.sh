@@ -38,7 +38,7 @@ configtxgen \
     -inspectChannelCreateTx e2e_cli/${CHANNEL_ARTIFACTS}/channel.tx > e2e_cli/${CHANNEL_ARTIFACTS}/channel.json
 
 
-echo "Create the anchor peer configuration tx for org1, org2 and org3"
+echo "Create the anchor peer configuration tx for org1 and org2"
 
 configtxgen \
     -configPath e2e_cli \
@@ -47,30 +47,9 @@ configtxgen \
     -asOrg ${ORG1MSP} \
     -outputAnchorPeersUpdate e2e_cli/${CHANNEL_ARTIFACTS}/${UPDATE_ANCHOR_ORG1_TX}
 
-configtxgen \
-    -configPath e2e_cli \
-    -profile ${APP_CHANNEL_PROFILE} \
-    -channelID ${APP_CHANNEL} \
-    -asOrg ${ORG2MSP} \
-    -outputAnchorPeersUpdate e2e_cli/${CHANNEL_ARTIFACTS}/${UPDATE_ANCHOR_ORG2_TX}
-
-configtxgen \
-    -configPath e2e_cli \
-    -profile ${APP_CHANNEL_PROFILE} \
-    -channelID ${APP_CHANNEL} \
-    -asOrg ${ORG3MSP} \
-    -outputAnchorPeersUpdate e2e_cli/${CHANNEL_ARTIFACTS}/${UPDATE_ANCHOR_ORG3_TX}
-
-echo "Output the json for org1, org2 and org3"
+echo "Output the json for org1, org2"
 
 configtxgen \
     -configPath e2e_cli \
     -printOrg ${ORG1MSP} >e2e_cli/${CHANNEL_ARTIFACTS}/${ORG1MSP}.json
 
-configtxgen \
-    -configPath e2e_cli \
-    -printOrg ${ORG2MSP} >e2e_cli/${CHANNEL_ARTIFACTS}/${ORG2MSP}.json
-
-configtxgen \
-    -configPath e2e_cli \
-    -printOrg ${ORG3MSP} >e2e_cli/${CHANNEL_ARTIFACTS}/${ORG3MSP}.json
