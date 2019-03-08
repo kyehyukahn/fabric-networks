@@ -17,18 +17,33 @@ After cloning the code, you can choose the type of network
 
 ### 0.2. Start a Fabric Network
 
-To start an example fabric network you can simply run the following command:
+At first, some docker images is build from the official hyperledger images in order to set the network with CA. 
+I will provide the required images on docker hub LATER.
 
 ```bash
-$ docker pull hyperledger/fabric-peer:1.4.0
-$ docker pull hyperledger/fabric-orderer:1.4.0
-$ docker pull hyperledger/fabric-ca:1.4.0
-$ docker pull hyperledger/fabric-ccenv:1.4.0
-$ cd 7p@30W1os
+$ cd features/docker
+$ chmod 755 build.sh 
+$ ./build.sh
+
+
+$ docker images
+REPOSITORY                     TAG                 IMAGE ID            CREATED             SIZE
+bsquarelab/fabric-peer-ca      1.4.0               ee3a133f335c        21 minutes ago      853MB
+bsquarelab/fabric-orderer-ca   1.4.0               b8d5ebbfd1ec        28 minutes ago      847MB
+bsquarelab/fabric-tools-ca     latest              64c4ec048bb3        2 hours ago         1.63GB
+.
+.
+```
+
+To start an example fabric network you can simply run the following command:
+
+
+```bash
+$ cd features
 $ docker-compose -f docker-compose-xxx.yaml up
 ```
 
-Then you'll have a fabric network with topology of 3 organizations:
+Then you'll have a fabric network with the various cases :
  * org1.example.com
    * peer0.org1.example.com
    * peer1.org1.example.com
