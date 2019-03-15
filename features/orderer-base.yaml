@@ -13,11 +13,11 @@ services:
     image: bsquarelab/fabric-orderer-ca:1.4.0
 #    image: hyperledger/fabric-orderer:1.4.0
     environment:
-      - ORDERER_GENERAL_LOGLEVEL=DEBUG
+      - ORDERER_GENERAL_LOGLEVEL=info
       - ORDERER_GENERAL_LISTENADDRESS=0.0.0.0
       - ORDERER_GENERAL_GENESISMETHOD=file
       - ORDERER_GENERAL_GENESISFILE=/var/hyperledger/orderer/orderer.genesis.block
-      - ORDERER_GENERAL_LOCALMSPID=OrdererMSP
+      - ORDERER_GENERAL_LOCALMSPID=OrdererOrg0MSP
       - ORDERER_GENERAL_LOCALMSPDIR=/var/hyperledger/orderer/msp
       - ORDERER_GENERAL_LEDGERTYPE=file
       - ORDERER_GENERAL_BATCHTIMEOUT=2s
@@ -26,7 +26,7 @@ services:
       - ORDERER_GENERAL_LISTENPORT=7050
      #- ORDERER_RAMLEDGER_HISTORY_SIZE=100  #only useful when use ram ledger
       # enabled TLS
-      - ORDERER_GENERAL_TLS_ENABLED=true
+      - ORDERER_GENERAL_TLS_ENABLED=false
       - ORDERER_GENERAL_TLS_PRIVATEKEY=/var/hyperledger/orderer/tls/server.key
       - ORDERER_GENERAL_TLS_CERTIFICATE=/var/hyperledger/orderer/tls/server.crt
       - ORDERER_GENERAL_TLS_ROOTCAS=[/var/hyperledger/orderer/tls/ca.crt]

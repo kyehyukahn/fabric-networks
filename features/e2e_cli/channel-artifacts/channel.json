@@ -95,17 +95,7 @@
 									"version": "0"
 								}
 							},
-							"values": {
-								"Capabilities": {
-									"mod_policy": "Admins",
-									"value": {
-										"capabilities": {
-											"V1_3": {}
-										}
-									},
-									"version": "0"
-								}
-							},
+							"values": {},
 							"version": "1"
 						}
 					},
@@ -130,7 +120,7 @@
 				"channel_id": "businesschannel",
 				"epoch": "0",
 				"extension": null,
-				"timestamp": "2019-01-24T05:34:35Z",
+				"timestamp": "2019-03-15T02:31:19Z",
 				"tls_cert_hash": null,
 				"tx_id": "",
 				"type": 2,

@@ -1,0 +1,1 @@
+fabric-ca-client register --id.secret=ordererpassword -H /var/hyperledger/orderer/users/Admin@example.com/

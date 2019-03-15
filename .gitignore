@@ -11,7 +11,11 @@
 # Output of the go coverage tool, specifically when used with LiteIDE
 *.out
 
+# all logs
+log.txt
+
 .DS_Store
-crypto-config/
-channel-artifacts/
-fabric-ca-server
+#crypto-config/
+#channel-artifacts/
+#fabric-ca-server
+#ca-client
