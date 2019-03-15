@@ -98,7 +98,7 @@ services:
 #    command: peer node start
 #    command: bash -c "while true; do sleep 1; done"
 
-  peer0.org2.example.com:
+  peer2.org2.example.com:
     extends:
       file: peer-base.yaml
       service: peer-base
@@ -124,7 +124,7 @@ services:
 #    command: peer node start
 #    command: bash -c "while true; do sleep 1; done"
 
-  peer1.org2.example.com:
+  peer3.org2.example.com:
     extends:
       file: peer-base.yaml
       service: peer-base
@@ -183,5 +183,5 @@ services:
       - orderer.example.com
       - peer0.org1.example.com
       - peer1.org1.example.com
-      - peer0.org2.example.com
-      - peer1.org2.example.com
+      - peer2.org2.example.com
+      - peer3.org2.example.com
