@@ -1,0 +1,204 @@
+# SPDX-License-Identifier: Apache-2.0
+#
+
+# Base compose files for:
+
+# orderer.example.com
+# peer0.org1.example.com
+# peer1.org1.example.com
+# peer0.org2.example.com
+# peer1.org2.example.com
+
+
+version: '2'  # v3 does not support 'extends' yet
+
+networks:
+  features_default:
+
+services:
+  ca.example.com:
+    image: hyperledger/fabric-ca:1.4.0
+    environment:
+      - FABRIC_CA_HOME=/etc/hyperledger/fabric-ca-server
+      - FABRIC_CA_SERVER_CA_NAME=ca.example.com
+      - FABRIC_CA_SERVER_CA_CERTFILE=/etc/hyperledger/fabric-ca-server/ca-cert.pem
+      - FABRIC_CA_SERVER_CA_KEYFILE=/etc/hyperledger/fabric-ca-server-config/4239aa0dcd76daeeb8ba0cda701851d14504d31aad1b2ddddbac6a57365e497c_sk
+    ports:
+      - "7054:7054"
+#    command: bash -c "fabric-ca-server start  --ca.certfile /etc/hyperledger/fabric-ca-server/ca-cert.pem  --ca.keyfile /etc/hyperledger/fabric-ca-server/ca-key.pem -c /etc/hyperledger/fabric-ca-server/fabric-ca-server-config.yaml -b admin:adminpw -d"
+#    command: bash -c "fabric-ca-server start -c /etc/hyperledger/fabric-ca-server/fabric-ca-server-config.yaml -b admin:adminpw -d"
+    command: bash -c "fabric-ca-server start -b admin:adminpw --cfg.affiliations.allowremove --cfg.identities.allowremove -d"
+    volumes:
+      - ./ca/fabric-ca-server:/etc/hyperledger/fabric-ca-server/
+    container_name: ca.example.com
+    networks:
+      - features_default
+
+  orderer.example.com:  # There can be multiple orderers
+    extends:
+      file: orderer-base.yaml
+      service: orderer-base
+    container_name: orderer.example.com
+    hostname: orderer.example.com
+    ports:
+      - "7050:7050"
+    volumes:
+      - ./e2e_cli/channel-artifacts/orderer.genesis.block:/var/hyperledger/orderer/orderer.genesis.block
+      - ./e2e_cli/crypto-config/ordererOrganizations/ordererorg0/orderers/orderer0.ordererorg0/msp:/var/hyperledger/orderer/msp
+      - ./e2e_cli/crypto-config/ordererOrganizations/ordererorg0/orderers/orderer0.ordererorg0/tls/:/var/hyperledger/orderer/tls
+      - ./e2e_cli/crypto-config/ordererOrganizations/ordererorg0/users:/var/hyperledger/orderer/users
+      - ./scripts_ca:/home/scripts_ca/
+      - ./ca-client/orderer:/.fabric-ca-client/
+#    command: orderer start
+#    command: bash -c "while true; do sleep 1; done"
+    networks:
+      - features_default
+
+  peer0.org1.example.com:
+    extends:
+      file: peer-base.yaml
+      service: peer-base
+    container_name: peer0.org1.example.com
+    hostname: peer0.org1.example.com
+    environment:
+      - CORE_PEER_ID=peer0.org1
+      - CORE_PEER_ADDRESS=peer0.org1.example.com:7051
+      - CORE_PEER_CHAINCODELISTENADDRESS=peer0.org1.example.com:7052
+      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0.org1.example.com:7051
+      - CORE_PEER_LOCALMSPID=Org1MSP
+    volumes:
+      - ./e2e_cli/crypto-config/peerOrganizations/org1/peers/peer0.org1/msp:/etc/hyperledger/fabric/msp
+      - ./e2e_cli/crypto-config/peerOrganizations/org1/peers/peer0.org1/tls:/etc/hyperledger/fabric/tls
+      - ./e2e_cli/crypto-config/peerOrganizations/org1/users:/etc/hyperledger/fabric/users
+      - ./scripts_ca:/home/scripts_ca/
+      - ./ca-client/peer0.org1.example.com:/.fabric-ca-client/
+    ports:
+      - 7051:7051
+      - 7052:7052
+      - 7053:7053
+#    command: peer node start
+#    command: bash -c "while true; do sleep 1; done"
+    networks:
+      - features_default
+
+  peer1.org1.example.com:
+    extends:
+      file: peer-base.yaml
+      service: peer-base
+    container_name: peer1.org1.example.com
+    hostname: peer1.org1.example.com
+    environment:
+      - CORE_PEER_ID=peer1.org1
+      - CORE_PEER_ADDRESS=peer1.org1.example.com:7051
+      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer1.org1.example.com:7051
+      - CORE_PEER_CHAINCODELISTENADDRESS=peer1.org1.example.com:7052
+      - CORE_PEER_GOSSIP_BOOTSTRAP=peer0.org1.example.com:7051
+      - CORE_PEER_LOCALMSPID=Org1MSP
+    volumes:
+      - ./e2e_cli/crypto-config/peerOrganizations/org1/peers/peer1.org1/msp:/etc/hyperledger/fabric/msp
+      - ./e2e_cli/crypto-config/peerOrganizations/org1/peers/peer1.org1/tls:/etc/hyperledger/fabric/tls
+      - ./e2e_cli/crypto-config/peerOrganizations/org1/users:/etc/hyperledger/fabric/users
+      - ./scripts_ca:/home/scripts_ca/
+      - ./ca-client/peer1.org1.example.com:/.fabric-ca-client/
+    ports:
+      - 8051:7051
+      - 8052:7052
+      - 8053:7053
+#    command: peer node start
+#    command: bash -c "while true; do sleep 1; done"
+    networks:
+      - features_default
+
+  peer2.org2.example.com:
+    extends:
+      file: peer-base.yaml
+      service: peer-base
+    container_name: peer2.org2.example.com
+    hostname: peer2.org2.example.com
+    environment:
+      - CORE_PEER_ID=peer2.org2
+      - CORE_PEER_ADDRESS=peer2.org2.example.com:7051
+      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer2.org2.example.com:7051
+      - CORE_PEER_CHAINCODELISTENADDRESS=peer2.org2.example.com:7052
+      - CORE_PEER_GOSSIP_BOOTSTRAP=peer2.org2.example.com:7051
+      - CORE_PEER_LOCALMSPID=Org2MSP
+    volumes:
+      - ./e2e_cli/crypto-config/peerOrganizations/org2/peers/peer2.org2/msp:/etc/hyperledger/fabric/msp
+      - ./e2e_cli/crypto-config/peerOrganizations/org2/peers/peer2.org2/tls:/etc/hyperledger/fabric/tls
+      - ./e2e_cli/crypto-config/peerOrganizations/org2/users:/etc/hyperledger/fabric/users
+      - ./scripts_ca:/home/scripts_ca/
+      - ./ca-client/peer0.org2.example.com:/.fabric-ca-client/
+    ports:
+      - 9051:7051
+      - 9052:7052
+      - 9053:7053
+#    command: peer node start
+#    command: bash -c "while true; do sleep 1; done"
+    networks:
+      - features_default
+
+  peer3.org2.example.com:
+    extends:
+      file: peer-base.yaml
+      service: peer-base
+    container_name: peer3.org2.example.com
+    hostname: peer3.org2.example.com
+    environment:
+      - CORE_PEER_ID=peer3.org2
+      - CORE_PEER_ADDRESS=peer3.org2.example.com:7051
+      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer3.org2.example.com:7051
+      - CORE_PEER_CHAINCODELISTENADDRESS=peer3.org2.example.com:7052
+      - CORE_PEER_GOSSIP_BOOTSTRAP=peer3.org2.example.com:7051
+      - CORE_PEER_LOCALMSPID=Org2MSP
+    volumes:
+      - ./e2e_cli/crypto-config/peerOrganizations/org2/peers/peer3.org2/msp:/etc/hyperledger/fabric/msp
+      - ./e2e_cli/crypto-config/peerOrganizations/org2/peers/peer3.org2/tls:/etc/hyperledger/fabric/tls
+      - ./e2e_cli/crypto-config/peerOrganizations/org2/users:/etc/hyperledger/fabric/users
+      - ./scripts_ca:/home/scripts_ca/
+      - ./ca-client/peer1.org2.example.com:/.fabric-ca-client/
+    ports:
+      - 10051:7051
+      - 10052:7052
+      - 10053:7053
+#    command: peer node start
+#    command: bash -c "while true; do sleep 1; done"
+    networks:
+      - features_default
+
+
+  cli:
+    container_name: cli
+    image: bsquarelab/fabric-tools-ca
+#    image: hyperledger/fabric-tools
+    tty: true
+    environment:
+      - GOPATH=/opt/gopath
+      - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
+      - CORE_LOGGING_LEVEL=DEBUG
+      - FABRIC_LOGGING_SPEC=DEBUG
+      - CORE_PEER_ID=cli
+      - CORE_PEER_ADDRESS=peer0.org1.example.com:7051
+      - CORE_PEER_LOCALMSPID=Org1MSP
+      - CORE_PEER_TLS_ENABLED=false
+      - CORE_PEER_TLS_CERT_FILE=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1/peers/peer0.org1/tls/server.crt
+      - CORE_PEER_TLS_KEY_FILE=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1/peers/peer0.org1/tls/server.key
+      - CORE_PEER_TLS_ROOTCERT_FILE=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1/peers/peer0.org1/tls/ca.crt
+      - CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1/users/Admin@org1/msp
+    working_dir: /opt/gopath/src/github.com/hyperledger/fabric/peer
+#    command: /bin/bash -c './scripts/script.sh ${CHANNEL_NAME}; sleep $TIMEOUT'
+    volumes:
+      - /var/run/:/host/var/run/
+      - ./e2e_cli/examples/chaincode/go/:/opt/gopath/src/github.com/hyperledger/fabric/examples/chaincode/go
+      - ./e2e_cli/crypto-config:/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/
+      - ./scripts:/opt/gopath/src/github.com/hyperledger/fabric/peer/scripts/
+      - ./scripts_ca:/opt/gopath/src/github.com/hyperledger/fabric/peer/scripts_ca/
+      - ./e2e_cli/channel-artifacts:/opt/gopath/src/github.com/hyperledger/fabric/peer/channel-artifacts
+      - ./ca-client/cli:/.fabric-ca-client
+    depends_on:
+      - orderer.example.com
+      - peer0.org1.example.com
+      - peer1.org1.example.com
+      - peer2.org2.example.com
+      - peer3.org2.example.com
+    networks:
+      - features_default
