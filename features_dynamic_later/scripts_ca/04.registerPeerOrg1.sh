@@ -1,0 +1,2 @@
+fabric-ca-client register --id.secret=peer0password -H /etc/hyperledger/fabric/users/Admin@org1.example.com
+fabric-ca-client register --id.secret=peer1password -H /etc/hyperledger/fabric/users/Admin@org1.example.com
